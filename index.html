@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>AI Resume Analyzer Pro</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --blue:#4f46e5;--bl:#eef2ff;--bd:#3730a3;
+  --green:#059669;--gl:#ecfdf5;
+  --red:#dc2626;--rl:#fef2f2;
+  --amber:#d97706;--al:#fffbeb;
+  --purple:#7c3aed;--pl:#f5f3ff;
+  --cyan:#0891b2;--cl:#ecfeff;
+  --gray:#f8fafc;--gm:#e2e8f0;
+  --text:#0f172a;--t2:#475569;--t3:#94a3b8;
+  --border:#e2e8f0;
+  --r:10px;--rl2:16px;
+}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f1f5f9;color:var(--text);min-height:100vh}
+.hdr{background:linear-gradient(135deg,#4f46e5,#7c3aed,#db2777);color:#fff;padding:18px 24px;display:flex;align-items:center;gap:12px}
+.hi{width:44px;height:44px;background:rgba(255,255,255,.2);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.ht{font-size:20px;font-weight:800}
+.hs{font-size:12px;opacity:.85;margin-top:2px}
+.hb{margin-left:auto;background:rgba(255,255,255,.2);padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;border:1px solid rgba(255,255,255,.3)}
+.tabs{background:#fff;border-bottom:1px solid var(--border);padding:0 16px;display:flex;overflow-x:auto}
+.tab{padding:13px 14px;font-size:12px;font-weight:500;color:var(--t2);cursor:pointer;border-bottom:3px solid transparent;white-space:nowrap;transition:all .2s;border:none;background:none;font-family:inherit;display:flex;align-items:center;gap:4px}
+.tab:hover{color:var(--blue)}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue);font-weight:700}
+.content{max-width:920px;margin:0 auto;padding:20px 12px}
+.panel{display:none}
+.panel.active{display:block;animation:fi .2s}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.card{background:#fff;border:1px solid var(--border);border-radius:var(--rl2);padding:18px;margin-bottom:14px;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.ct{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px;margin-bottom:14px}
+.ci{width:28px;height:28px;border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.upz{border:2px dashed #c7d2fe;border-radius:var(--rl2);padding:44px 20px;text-align:center;cursor:pointer;background:linear-gradient(135deg,#fafafe,#f0f4ff);transition:all .2s}
+.upz:hover,.upz.drag{border-color:var(--blue);background:var(--bl)}
+.inp{width:100%;padding:9px 13px;border:1.5px solid var(--border);border-radius:var(--r);font-size:13px;color:var(--text);background:var(--gray);outline:none;transition:all .15s;font-family:inherit}
+.inp:focus{border-color:var(--blue);background:#fff;box-shadow:0 0 0 3px rgba(79,70,229,.1)}
+.ta{resize:vertical;min-height:110px;line-height:1.6}
+.lbl{font-size:11px;color:var(--t2);font-weight:700;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.06em}
+.fg{margin-bottom:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.btn{padding:9px 18px;border-radius:var(--r);font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text);transition:all .2s;font-family:inherit;display:inline-flex;align-items:center;gap:5px}
+.btn:active{transform:scale(.98)}
+.btn:hover{opacity:.9}
+.bp{background:linear-gradient(135deg,var(--blue),var(--bd));color:#fff;border-color:var(--blue)}
+.bg2{background:linear-gradient(135deg,var(--green),#047857);color:#fff;border-color:var(--green)}
+.bpu{background:linear-gradient(135deg,var(--purple),#6d28d9);color:#fff;border-color:var(--purple)}
+.bc{background:linear-gradient(135deg,var(--cyan),#0e7490);color:#fff;border-color:var(--cyan)}
+.ba{background:linear-gradient(135deg,var(--amber),#b45309);color:#fff;border-color:var(--amber)}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.tag{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:20px;margin:2px}
+.tg{background:var(--gl);color:#065f46;border:1px solid #a7f3d0}
+.tr{background:var(--rl);color:#991b1b;border:1px solid #fca5a5}
+.ta2{background:var(--al);color:#92400e;border:1px solid #fcd34d}
+.tb{background:var(--bl);color:#3730a3;border:1px solid #c7d2fe}
+.tp{background:var(--pl);color:#5b21b6;border:1px solid #ddd6fe}
+.tc{background:var(--cl);color:#164e63;border:1px solid #a5f3fc}
+.sc{width:120px;height:120px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 12px}
+.se{background:linear-gradient(135deg,#059669,#10b981);box-shadow:0 6px 20px rgba(5,150,105,.35)}
+.sg{background:linear-gradient(135deg,#4f46e5,#818cf8);box-shadow:0 6px 20px rgba(79,70,229,.35)}
+.sav{background:linear-gradient(135deg,#d97706,#fbbf24);box-shadow:0 6px 20px rgba(217,119,6,.35)}
+.spo{background:linear-gradient(135deg,#dc2626,#f87171);box-shadow:0 6px 20px rgba(220,38,38,.35)}
+.sn{font-size:32px;font-weight:900;color:#fff;line-height:1}
+.sd{font-size:11px;color:rgba(255,255,255,.8)}
+.sl{font-size:9px;color:rgba(255,255,255,.85);margin-top:1px;font-weight:700;text-transform:uppercase;letter-spacing:.05em}
+.pw{margin-bottom:10px}
+.pl2{display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:4px;font-weight:600}
+.pb{height:8px;background:var(--gm);border-radius:4px;overflow:hidden}
+.pf{height:100%;border-radius:4px;transition:width .9s ease}
+.fg3{background:linear-gradient(to right,#059669,#10b981)}
+.fa{background:linear-gradient(to right,#d97706,#fbbf24)}
+.fr{background:linear-gradient(to right,#dc2626,#f87171)}
+.alert{padding:11px 15px;border-radius:var(--r);font-size:13px;margin-top:10px;line-height:1.7}
+.ai{background:var(--bl);color:#3730a3;border-left:4px solid var(--blue)}
+.as{background:var(--gl);color:#065f46;border-left:4px solid var(--green)}
+.ad{background:var(--rl);color:#991b1b;border-left:4px solid var(--red)}
+.spw{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:44px;gap:14px}
+.spinner{width:38px;height:38px;border:3px solid var(--gm);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.spt{font-size:13px;color:var(--t3);font-weight:500}
+.fi2{background:linear-gradient(135deg,#ecfdf5,#d1fae5);border:1.5px solid #6ee7b7;border-radius:var(--r);padding:11px 15px;display:flex;align-items:center;gap:11px;margin-top:11px}
+.sh{font-size:11px;font-weight:700;color:var(--t2);margin:14px 0 8px;text-transform:uppercase;letter-spacing:.08em;padding-bottom:4px;border-bottom:2px solid var(--gm)}
+.clt{background:#fafafe;border:1.5px solid var(--border);border-radius:var(--rl2);padding:20px;font-size:14px;line-height:1.9;color:var(--text);white-space:pre-wrap;font-family:'Georgia',serif}
+.ms{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:16px}
+.msi{background:#fff;border:1px solid var(--border);border-radius:var(--rl2);padding:13px;text-align:center}
+.msv{font-size:22px;font-weight:900;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.msl{font-size:10px;color:var(--t3);margin-top:2px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+.qi{background:var(--gray);border:1px solid var(--border);border-radius:var(--r);padding:13px;margin-bottom:10px}
+.qi:hover{border-color:var(--blue);background:var(--bl)}
+.sc2{background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:var(--rl2);padding:20px;color:#fff;margin-bottom:12px}
+.lb{background:linear-gradient(135deg,#0077b5,#005f8e);border-radius:var(--rl2);padding:17px;color:#fff;font-size:13px;line-height:1.8;margin-bottom:12px}
+.ri{display:flex;gap:12px;padding:11px 0;border-bottom:1px solid var(--gm)}
+.rn{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tpc{background:linear-gradient(135deg,var(--bl),#f0f4ff);border:1.5px solid #c7d2fe;border-radius:var(--rl2);padding:14px;margin-bottom:10px}
+.tpt{font-size:13px;font-weight:700;color:var(--blue);margin-bottom:6px}
+.tpb{font-size:12px;color:var(--t2);line-height:1.7}
+.chk{display:flex;align-items:flex-start;gap:9px;padding:8px 0;border-bottom:1px solid var(--gm);font-size:13px}
+@media(max-width:640px){.g2{grid-template-columns:1fr}.ms{grid-template-columns:1fr 1fr}.tab{padding:11px 9px;font-size:11px}}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hi">🚀</div>
+  <div><div class="ht">AI Resume Analyzer Pro</div><div class="hs">Powered by Groq AI — Get hired faster!</div></div>
+  <div class="hb">✨ Free &amp; Instant</div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" id="tab-analyze" onclick="sw('analyze')">📄 Analyze</button>
+  <button class="tab" id="tab-match" onclick="sw('match')">🎯 Job Match</button>
+  <button class="tab" id="tab-cover" onclick="sw('cover')">✉️ Cover Letter</button>
+  <button class="tab" id="tab-interview" onclick="sw('interview')">🎤 Interview</button>
+  <button class="tab" id="tab-linkedin" onclick="sw('linkedin')">🔗 LinkedIn</button>
+  <button class="tab" id="tab-salary" onclick="sw('salary')">💰 Salary</button>
+  <button class="tab" id="tab-roadmap" onclick="sw('roadmap')">🗺️ Roadmap</button>
+  <button class="tab" id="tab-tips" onclick="sw('tips')">💡 Tips</button>
+</div>
+
+<div class="content">
+
+<div class="panel active" id="panel-analyze">
+  <div class="card">
+    <div class="ct"><div class="ci" style="background:var(--bl)">📄</div>Upload Resume for AI Analysis</div>
+    <div class="upz" id="upz" onclick="document.getElementById('rfile').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="onDrop(event)">
+      <input type="file" id="rfile" accept=".pdf,.txt,.jpg,.jpeg,.png,.webp" style="display:none" onchange="onFile(event)"/>
+      <div style="font-size:44px;margin-bottom:10px">📋</div>
+      <div style="font-size:17px;font-weight:700;margin-bottom:6px">Drop your resume here</div>
+      <div style="font-size:12px;color:var(--t3);margin-bottom:16px">PDF · TXT · JPG · PNG · AI Vision for images</div>
+      <button class="btn bp" onclick="event.stopPropagation();document.getElementById('rfile').click()">📁 Browse File</button>
+    </div>
+    <div id="finfo"></div>
+    <div class="row" style="margin-top:12px">
+      <button class="btn bp" id="abtn" style="display:none" onclick="doAnalyze()">🔍 Analyze Resume</button>
+      <button class="btn" id="cbtn" style="display:none" onclick="clearFile()">🗑 Clear</button>
+    </div>
+  </div>
+  <div id="ares"></div>
+</div>
+
+<div class="panel" id="panel-match">
+  <div class="card">
+    <div class="ct"><div class="ci" style="background:var(--gl)">🎯</div>Match Resume to Job Description</div>
+    <div class="fg"><label class="lbl">Your Resume Text</label><textarea class="inp ta" id="mr" placeholder="Paste your resume here..."></textarea></div>
+    <div class="fg"><label class="lbl">Job Description</label><textarea class="inp ta" id="mjd" placeholder="Paste job description here..."></textarea></div>
+    <button class="btn bg2" onclick="doMatch()">🎯 Calculate Match Score</button>
+  </div>
+  <div id="mres"></div>
+</div>
+
+<div class="panel" id="panel-cover">
+  <div class="card">
+    <div class="ct"><div class="ci" style="background:var(--pl)">✉️</div>AI Cover Letter Generator</div>
+    <div class="g2">
+      <div class="fg"><label class="lbl">Company Name</label><input class="inp" id="cco" placeholder="e.g. Google, TCS"/></div>
+      <div class="fg"><label class="lbl">Job Role</label><input class="inp" id="cro" placeholder="e.g. Software Engineer"/></div>
+    </div>
+    <div class="fg"><label class="lbl">Tone</label>
+      <select class="inp" id="ctone">
+        <option value="professional">Professional &amp; Formal</option>
+        <option value="enthusiastic">Enthusiastic &amp; Energetic</option>
+        <option value="creative">Creative &amp; Unique</option>
+        <option value="concise">Short &amp; Concise</option>
+      </select>
+    </div>
+    <div class="fg"><label class="lbl">Your Resume Text</label><textarea class="inp ta" id="cres" placeholder="Paste your resume here..."></textarea></div>
+    <div class="fg"><label class="lbl">Job Description (Optional)</label><textarea class="inp ta" style="min-height:80px" id="cjd" placeholder="Paste job description..."></textarea></div>
+    <button class="btn bpu" onclick="doCover()">✉️ Generate Cover Letter</button>
+  </div>
+  <div id="cres2"></div>
+</div>
+
+<div class="panel" id="panel-interview">
+  <div class="card">
+    <div class="ct"><div class="ci" style="background:var(--al)">🎤</div>Interview Questions Generator</div>
+    <div class="g2">
+      <div class="fg"><label class="lbl">Job Role</label><input class="inp" id="iro" placeholder="e.g. Data Analyst"/></div>
+      <div class="fg"><label class="lbl">Experience Level</label>
+        <select class="inp" id="ilvl">
+          <option>Fresher (0-1 years)</option><option>Junior (1-3 years)</option>
+          <option>Mid Level (3-5 years)</option><option>Senior (5+ years)</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg"><label class="lbl">Question Type</label>
+      <select class="inp" id="ityp">
+        <option value="all">All Types (Technical + HR + Behavioral)</option>
+        <option value="technical">Technical Only</option>
+        <option value="hr">HR &amp; Behavioral Only</option>
+        <option value="situational">Situational Questions</option>
+        <option value="tricky">Tricky &amp; Tough Questions</option>
+      </select>
+    </div>
+    <div class="fg"><label class="lbl">Number of Questions</label>
+      <select class="inp" id="inum">
+        <option value="10">10 Questions</option>
+        <option value="20">20 Questions</option>
+        <option value="30">30 Questions</option>
+        <option value="50" selected>50 Questions</option>
+      </select>
+    </div>
+    <div class="fg"><label class="lbl">Resume (Optional)</label><textarea class="inp ta" style="min-height:80px" id="ires" placeholder="Paste resume for personalized questions..."></textarea></div>
+    <button class="btn ba" onclick="doInterview()">🎤 Generate Questions</button>
+  </div>
+  <div id="ires2"></div>
+</div>
+
+<div class="panel" id="panel-linkedin">
+  <div class="card">
+    <div class="ct"><div class="ci" style="background:#e0f0fa">🔗</div>LinkedIn Profile Optimizer</div>
+    <div class="fg"><label class="lbl">What to Generate</label>
+      <select class="inp" id="ltyp">
+        <option value="summary">LinkedIn Summary / About Section</option>
+        <option value="headline">Professional Headline (5 options)</option>
+        <option value="experience">Experience Description</option>
+        <option value="post">LinkedIn Post about your project</option>
+        <option value="connection">Connection Request Message</option>
+        <option value="recommendation">Recommendation Request</option>
+      </select>
+    </div>
+    <div class="fg"><label class="lbl">Your Resume / Background</label><textarea class="inp ta" id="lres" placeholder="Paste your resume or background..."></textarea></div>
+    <div class="fg"><label class="lbl">Target Role / Industry (Optional)</label><input class="inp" id="ltgt" placeholder="e.g. Data Science, AI Engineer"/></div>
+    <button class="btn bc" onclick="doLinkedIn()">🔗 Generate LinkedIn Content</button>
+  </div>
+  <div id="lres2"></div>
+</div>
+
+<div class="panel" id="panel-salary">
+  <div class="card">
+    <div class="ct"><div class="ci" style="background:#fef3c7">💰</div>Salary Estimator &amp; Negotiation Guide</div>
+    <div class="g2">
+      <div class="fg"><label class="lbl">Job Role</label><input class="inp" id="sro" placeholder="e.g. Data Analyst"/></div>
+      <div class="fg"><label class="lbl">Location</label><input class="inp" id="sloc" placeholder="e.g. Bangalore, Mumbai"/></div>
+      <div class="fg"><label class="lbl">Experience (Years)</label><input class="inp" id="sexp" type="number" placeholder="e.g. 2"/></div>
+      <div class="fg"><label class="lbl">Skills</label><input class="inp" id="ssk" placeholder="e.g. Python, SQL"/></div>
+    </div>
+    <button class="btn ba" onclick="doSalary()">💰 Estimate My Salary</button>
+  </div>
+  <div id="sres"></div>
+</div>
+
+<div class="panel" id="panel-roadmap">
+  <div class="card">
+    <div class="ct"><div class="ci" style="background:var(--pl)">🗺️</div>Personalized Skill Roadmap</div>
+    <div class="g2">
+      <div class="fg"><label class="lbl">Current Role / Background</label><input class="inp" id="rcur" placeholder="e.g. CS Student"/></div>
+      <div class="fg"><label class="lbl">Target Role</label><input class="inp" id="rtgt" placeholder="e.g. Data Scientist"/></div>
+    </div>
+    <div class="fg"><label class="lbl">Current Skills</label><input class="inp" id="rsk" placeholder="e.g. Python, HTML, SQL"/></div>
+    <div class="fg"><label class="lbl">Timeline</label>
+      <select class="inp" id="rtl">
+        <option>3 months</option><option>6 months</option><option>1 year</option><option>2 years</option>
+      </select>
+    </div>
+    <button class="btn bpu" onclick="doRoadmap()">🗺️ Generate Roadmap</button>
+  </div>
+  <div id="rres"></div>
+</div>
+
+<div class="panel" id="panel-tips">
+  <div class="ms">
+    <div class="msi"><div class="msv">75%</div><div class="msl">Resumes fail ATS</div></div>
+    <div class="msi"><div class="msv">6sec</div><div class="msl">Recruiter scan time</div></div>
+    <div class="msi"><div class="msv">1-2</div><div class="msl">Ideal pages</div></div>
+    <div class="msi"><div class="msv">40%</div><div class="msl">More callbacks</div></div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ci" style="background:var(--bl)">📝</div>Resume Writing Checklist</div>
+    <div class="chk"><span>✅</span><span>Contact info: name, email, phone, LinkedIn, GitHub</span></div>
+    <div class="chk"><span>✅</span><span>Professional email address</span></div>
+    <div class="chk"><span>✅</span><span>Resume is 1-2 pages only</span></div>
+    <div class="chk"><span>✅</span><span>No spelling or grammar errors</span></div>
+    <div class="chk"><span>✅</span><span>Used bullet points throughout</span></div>
+    <div class="chk"><span>✅</span><span>Quantified achievements (e.g. increased sales by 30%)</span></div>
+    <div class="chk"><span>✅</span><span>Strong action verbs to start each bullet</span></div>
+    <div class="chk"><span>✅</span><span>Tailored resume for specific job</span></div>
+    <div class="chk"><span>✅</span><span>Skills section matches job description keywords</span></div>
+    <div class="chk"><span>✅</span><span>Education: GPA if above 7.5/10</span></div>
+    <div class="chk"><span>✅</span><span>Projects section with tech stack and impact</span></div>
+    <div class="chk"><span>✅</span><span>Saved as PDF with professional filename</span></div>
+    <div class="chk"><span>⚠️</span><span>No personal photo (unless required in your country)</span></div>
+    <div class="chk"><span>⚠️</span><span>No tables, graphics, or fancy formatting</span></div>
+    <div class="chk"><span>⚠️</span><span>No personal info like age, religion, marital status</span></div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ci" style="background:var(--gl)">🤖</div>ATS Optimization Guide</div>
+    <div class="tpc"><div class="tpt">🔑 Use Keywords from Job Description</div><div class="tpb">Copy exact phrases from the job posting. ATS matches exact keywords.</div></div>
+    <div class="tpc" style="background:linear-gradient(135deg,var(--gl),#d1fae5);border-color:#6ee7b7"><div class="tpt" style="color:var(--green)">📐 Simple Formatting Only</div><div class="tpb">Avoid tables, columns, text boxes. Use simple single-column layout.</div></div>
+    <div class="tpc" style="background:linear-gradient(135deg,var(--pl),#ede9fe);border-color:#ddd6fe"><div class="tpt" style="color:var(--purple)">📝 Standard Section Headings</div><div class="tpb">Use: Work Experience, Education, Skills, Projects.</div></div>
+    <div class="tpc" style="background:linear-gradient(135deg,var(--al),#fef9c3);border-color:#fcd34d"><div class="tpt" style="color:var(--amber)">🔤 Spell Out Abbreviations</div><div class="tpb">Write "Artificial Intelligence (AI)" not just "AI".</div></div>
+  </div>
+  <div class="card">
+    <div class="ct"><div class="ci" style="background:var(--pl)">⚡</div>Power Action Verbs</div>
+    <div class="sh">Leadership</div>
+    <div><span class="tag tb">Led</span><span class="tag tb">Managed</span><span class="tag tb">Directed</span><span class="tag tb">Coordinated</span><span class="tag tb">Spearheaded</span></div>
+    <div class="sh">Technical</div>
+    <div><span class="tag tp">Developed</span><span class="tag tp">Implemented</span><span class="tag tp">Designed</span><span class="tag tp">Built</span><span class="tag tp">Engineered</span></div>
+    <div class="sh">Analysis</div>
+    <div><span class="tag tc">Analyzed</span><span class="tag tc">Researched</span><span class="tag tc">Evaluated</span><span class="tag tc">Identified</span><span class="tag tc">Assessed</span></div>
+    <div class="sh">Achievements</div>
+    <div><span class="tag tg">Achieved</span><span class="tag tg">Increased</span><span class="tag tg">Reduced</span><span class="tag tg">Improved</span><span class="tag tg">Launched</span></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+var TABS = ['analyze','match','cover','interview','linkedin','salary','roadmap','tips'];
+
+function sw(name) {
+  TABS.forEach(function(t) {
+    document.getElementById('panel-'+t).classList.toggle('active', t===name);
+    document.getElementById('tab-'+t).classList.toggle('active', t===name);
+  });
+}
+
+function spin(msg) {
+  return '<div class="card"><div class="spw"><div class="spinner"></div><div class="spt">'+(msg||'AI is thinking...')+'</div></div></div>';
+}
+
+function scoreClass(s) { return s>=80?'se':s>=60?'sg':s>=40?'sav':'spo'; }
+function fillClass(v) { return v>=70?'fg3':v>=50?'fa':'fr'; }
+
+function safeJSON(txt) {
+  if (!txt) return null;
+  var t = txt.replace(/```json/g,'').replace(/```/g,'').trim();
+  try { return JSON.parse(t); } catch(e) {}
+  var s = t.indexOf('{'), e2 = t.lastIndexOf('}')+1;
+  if (s>=0 && e2>s) { try { return JSON.parse(t.substring(s,e2)); } catch(e) {} }
+  var s2 = t.indexOf('['), e3 = t.lastIndexOf(']')+1;
+  if (s2>=0 && e3>s2) { try { return JSON.parse(t.substring(s2,e3)); } catch(e) {} }
+  return null;
+}
+
+async function api(endpoint, data) {
+  var res = await fetch(endpoint, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  var text = await res.text();
+  var json;
+  try { json = JSON.parse(text); }
+  catch(e) {
+    console.error('Server returned non-JSON from', endpoint, ':', text.substring(0, 200));
+    throw new Error('Server error ' + res.status + ' — check console for details');
+  }
+  if (!res.ok) throw new Error(json.error || 'Server error ' + res.status);
+  return json;
+}
+
+async function chat(prompt, system) {
+  var json = await api('/api/chat', { prompt: prompt, system: system || '' });
+  return json.reply || '';
+}
+
+function readFile(file) {
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) { resolve(e.target.result); };
+    reader.onerror = function() { reject(new Error('Could not read file')); };
+    var ext = file.name.split('.').pop().toLowerCase();
+    if (['pdf','jpg','jpeg','png','webp'].indexOf(ext) !== -1) {
+      reader.readAsDataURL(file);
+    } else {
+      reader.readAsText(file);
+    }
+  });
+}
+
+function onDrop(e) {
+  e.preventDefault();
+  document.getElementById('upz').classList.remove('drag');
+  var f = e.dataTransfer.files[0]; if (f) setFile(f);
+}
+function onFile(e) { var f = e.target.files[0]; if (f) setFile(f); }
+function setFile(f) {
+  window._file = f;
+  var ext = f.name.split('.').pop().toLowerCase();
+  var isImg = ['jpg','jpeg','png','webp'].indexOf(ext) !== -1;
+  document.getElementById('finfo').innerHTML = '<div class="fi2"><span style="font-size:22px">'+(isImg?'🖼️':'📄')+'</span><div><div style="font-size:13px;font-weight:700;color:#065f46">✅ '+f.name+'</div><div style="font-size:11px;color:var(--t3)">'+(f.size/1024).toFixed(0)+' KB'+(isImg?' · AI Vision will extract text':'')+'</div></div></div>';
+  document.getElementById('abtn').style.display = 'inline-flex';
+  document.getElementById('cbtn').style.display = 'inline-flex';
+}
+function clearFile() {
+  window._file = null;
+  document.getElementById('finfo').innerHTML = '';
+  document.getElementById('abtn').style.display = 'none';
+  document.getElementById('cbtn').style.display = 'none';
+  document.getElementById('ares').innerHTML = '';
+  document.getElementById('rfile').value = '';
+}
+function copyEl(id) {
+  var el = document.getElementById(id);
+  if (!el) return;
+  navigator.clipboard.writeText(el.innerText||el.textContent).then(function(){alert('Copied!');}).catch(function(){alert('Select and copy manually.');});
+}
+
+// ANALYZE
+async function doAnalyze() {
+  if (!window._file) { alert('Please upload a file first.'); return; }
+  var f = window._file;
+  var ext = f.name.split('.').pop().toLowerCase();
+  var allowed = ['pdf','txt','jpg','jpeg','png','webp'];
+  if (allowed.indexOf(ext) === -1) { alert('Please upload PDF, TXT, JPG or PNG only.'); return; }
+  var out = document.getElementById('ares');
+  var isImg = ['jpg','jpeg','png','webp'].indexOf(ext) !== -1;
+  out.innerHTML = spin(isImg ? 'AI Vision is reading your resume image...' : 'AI is analyzing your resume...');
+  try {
+    var fileData = await readFile(f);
+    if (!fileData || fileData.trim().length < 10) throw new Error('Could not read file. Please try a PDF or TXT.');
+    var json = await api('/api/resume/analyze', { text: fileData, filename: f.name });
+    if (!json.success) throw new Error(json.error || 'Analysis failed');
+    renderAnalysis(json.data);
+    window._resumeData = json.data;
+  } catch(e) {
+    out.innerHTML = '<div class="card"><div class="alert ad">❌ '+e.message+'</div></div>';
+  }
+}
+
+function renderAnalysis(d) {
+  var out = document.getElementById('ares');
+  var sc = d.scores || {};
+  var scC = scoreClass(d.overallScore||0);
+  var scL = (d.overallScore||0)>=80?'Excellent ✨':(d.overallScore||0)>=60?'Good 👍':(d.overallScore||0)>=40?'Average ⚠️':'Needs Work 🔧';
+  var h = '';
+  h += '<div class="ms"><div class="msi"><div class="msv">'+(d.overallScore||0)+'</div><div class="msl">Overall Score</div></div><div class="msi"><div class="msv">'+(d.atsScore||0)+'</div><div class="msl">ATS Score</div></div><div class="msi"><div class="msv">'+((d.skills||[]).length)+'</div><div class="msl">Skills Found</div></div><div class="msi"><div class="msv">'+(d.careerLevel||'—')+'</div><div class="msl">Level</div></div></div>';
+  h += '<div class="card" style="text-align:center"><div class="ct" style="justify-content:center">🎯 Resume Score</div><div class="sc '+scC+'"><div class="sn">'+(d.overallScore||0)+'</div><div class="sd">/100</div><div class="sl">'+scL+'</div></div><p style="font-size:13px;color:var(--t2);max-width:400px;margin:0 auto">'+(d.summary||'')+'</p></div>';
+  if (d.name) {
+    h += '<div class="card"><div class="ct"><div class="ci" style="background:var(--bl)">👤</div>Candidate Profile</div>';
+    h += '<div style="font-size:18px;font-weight:800;background:linear-gradient(135deg,var(--blue),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:8px">'+d.name+'</div>';
+    h += '<div class="row">'+(d.email?'<span class="tag tb">📧 '+d.email+'</span>':'')+(d.phone?'<span class="tag tb">📞 '+d.phone+'</span>':'')+(d.location?'<span class="tag tb">📍 '+d.location+'</span>':'')+'</div></div>';
+  }
+  h += '<div class="card"><div class="ct"><div class="ci" style="background:var(--bl)">📊</div>Score Breakdown</div>';
+  Object.keys(sc).forEach(function(k) {
+    var v = sc[k];
+    h += '<div class="pw"><div class="pl2"><span style="text-transform:capitalize">'+k+'</span><span style="color:'+(v>=70?'var(--green)':v>=50?'var(--amber)':'var(--red)')+'">'+v+'/100</span></div><div class="pb"><div class="pf '+fillClass(v)+'" style="width:'+v+'%"></div></div></div>';
+  });
+  h += '</div>';
+  h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px">';
+  h += '<div class="card" style="margin-bottom:0;border-top:3px solid var(--green)"><div class="ct" style="color:var(--green)">✅ Strengths</div>';
+  (d.strengths||[]).forEach(function(s){ h += '<div style="display:flex;gap:7px;margin-bottom:8px;font-size:13px"><span style="color:var(--green)">✓</span><span>'+s+'</span></div>'; });
+  h += '</div><div class="card" style="margin-bottom:0;border-top:3px solid var(--red)"><div class="ct" style="color:var(--red)">⚠️ Improvements</div>';
+  (d.weaknesses||[]).forEach(function(w){ h += '<div style="display:flex;gap:7px;margin-bottom:8px;font-size:13px"><span style="color:var(--red)">✗</span><span>'+w+'</span></div>'; });
+  h += '</div></div>';
+  h += '<div class="card"><div class="ct"><div class="ci" style="background:var(--cl)">🛠️</div>Skills</div>';
+  h += '<div class="sh">Found in Resume</div><div style="margin-bottom:10px">';
+  (d.skills||[]).forEach(function(s){ h += '<span class="tag tb">'+s+'</span>'; });
+  h += '</div>';
+  if (d.missingSkills&&d.missingSkills.length) {
+    h += '<div class="sh" style="color:var(--red)">Missing Skills</div><div>';
+    d.missingSkills.forEach(function(s){ h += '<span class="tag tr">'+s+'</span>'; });
+    h += '</div>';
+  }
+  h += '</div>';
+  if (d.experience&&d.experience.length) {
+    h += '<div class="card"><div class="ct"><div class="ci" style="background:var(--pl)">💼</div>Work Experience</div>';
+    d.experience.forEach(function(e){ h += '<div style="padding:11px;margin-bottom:8px;background:var(--gray);border-radius:var(--r);border-left:4px solid var(--blue)"><div style="font-size:13px;font-weight:800">'+(e.role||'—')+'</div><div style="font-size:12px;color:var(--blue);font-weight:600;margin-top:2px">'+(e.company||'—')+' <span style="color:var(--t3);font-weight:400">· '+(e.duration||'—')+'</span></div>'+(e.description?'<div style="font-size:12px;color:var(--t2);margin-top:5px;line-height:1.6">'+e.description+'</div>':'')+'</div>'; });
+    h += '</div>';
+  }
+  if (d.education&&d.education.length) {
+    h += '<div class="card"><div class="ct"><div class="ci" style="background:var(--gl)">🎓</div>Education</div>';
+    d.education.forEach(function(e){ h += '<div style="padding:10px;margin-bottom:7px;background:var(--gray);border-radius:var(--r);border-left:4px solid var(--green)"><div style="font-size:13px;font-weight:700">'+(e.degree||'—')+'</div><div style="font-size:12px;color:var(--green);margin-top:2px">'+(e.institution||'—')+' <span style="color:var(--t3)">· '+(e.year||'—')+'</span></div></div>'; });
+    h += '</div>';
+  }
+  h += '<div class="card" style="border-top:3px solid var(--amber)"><div class="ct"><div class="ci" style="background:var(--al)">💡</div>AI Suggestions</div>';
+  (d.suggestions||[]).forEach(function(s,i){ h += '<div style="display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--gm)"><div style="width:24px;height:24px;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;flex-shrink:0">'+(i+1)+'</div><div style="font-size:13px;line-height:1.7">'+s+'</div></div>'; });
+  h += '</div>';
+  if (d.atsTips&&d.atsTips.length) {
+    h += '<div class="card" style="border-top:3px solid var(--purple)"><div class="ct"><div class="ci" style="background:var(--pl)">🤖</div>ATS Tips</div>';
+    d.atsTips.forEach(function(t){ h += '<div style="display:flex;gap:9px;margin-bottom:9px;font-size:13px;background:var(--pl);padding:9px;border-radius:var(--r)"><span style="color:var(--purple)">⚡</span>'+t+'</div>'; });
+    h += '</div>';
+  }
+  h += '<div class="card" style="background:linear-gradient(135deg,#1e1b4b,#312e81);color:#fff"><div class="ct" style="color:#fff"><div class="ci" style="background:rgba(255,255,255,.2)">🎯</div>Career Recommendations</div>';
+  h += '<div class="sh" style="color:rgba(255,255,255,.7);border-color:rgba(255,255,255,.2)">Suitable Roles</div><div style="margin-bottom:10px">';
+  (d.jobRoles||[]).forEach(function(r){ h += '<span style="display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:600;margin:2px">'+r+'</span>'; });
+  h += '</div></div>';
+  h += '<div class="row" style="margin-bottom:16px"><button class="btn bg2" onclick="downloadPDF()">⬇️ Download PDF</button><button class="btn bp" onclick="sw(\'match\')">🎯 Job Match</button><button class="btn bpu" onclick="sw(\'cover\')">✉️ Cover Letter</button><button class="btn ba" onclick="sw(\'interview\')">🎤 Interview</button><button class="btn bc" onclick="sw(\'linkedin\')">🔗 LinkedIn</button></div>';
+  out.innerHTML = h;
+}
+
+// MATCH
+async function doMatch() {
+  var resume = document.getElementById('mr').value.trim();
+  var jd = document.getElementById('mjd').value.trim();
+  if (!resume||!jd) { alert('Please paste both resume and job description.'); return; }
+  var out = document.getElementById('mres');
+  out.innerHTML = spin('Calculating match score...');
+  try {
+    var json = await api('/api/resume/match', { resume: resume, jobDescription: jd });
+    if (!json.success) throw new Error(json.error||'Match failed');
+    var d = json.data;
+    var c = (d.matchScore||0)>=80?'var(--green)':(d.matchScore||0)>=60?'var(--blue)':(d.matchScore||0)>=40?'var(--amber)':'var(--red)';
+    var h = '<div class="card"><div style="text-align:center;padding:18px 0"><div style="font-size:56px;font-weight:900;color:'+c+'">'+(d.matchScore||0)+'%</div><div style="font-size:13px;color:var(--t2);margin-top:4px;font-weight:600">Match Score &middot; <strong style="color:'+c+'">'+(d.matchLevel||'')+'</strong></div></div>';
+    h += '<div class="pb" style="margin:0 40px 16px;height:12px"><div class="pf '+fillClass(d.matchScore||0)+'" style="width:'+(d.matchScore||0)+'%"></div></div>';
+    if (d.summary) h += '<div class="alert ai" style="text-align:center">'+d.summary+'</div>';
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px"><div><div class="sh" style="color:var(--green)">✅ Matched Skills</div><div>';
+    (d.matchedSkills||[]).forEach(function(s){ h += '<span class="tag tg">'+s+'</span>'; });
+    h += '</div><div class="sh" style="color:var(--green);margin-top:9px">🔑 Matched Keywords</div><div>';
+    (d.matchedKeywords||[]).forEach(function(k){ h += '<span class="tag tb">'+k+'</span>'; });
+    h += '</div></div><div><div class="sh" style="color:var(--red)">❌ Missing Skills</div><div>';
+    (d.missingSkills||[]).forEach(function(s){ h += '<span class="tag tr">'+s+'</span>'; });
+    h += '</div><div class="sh" style="color:var(--red);margin-top:9px">🔍 Missing Keywords</div><div>';
+    (d.missingKeywords||[]).forEach(function(k){ h += '<span class="tag ta2">'+k+'</span>'; });
+    h += '</div></div></div>';
+    if (d.suggestions&&d.suggestions.length) {
+      h += '<div class="sh" style="margin-top:14px">💡 How to Improve</div>';
+      d.suggestions.forEach(function(s,i){ h += '<div style="display:flex;gap:9px;margin-bottom:8px;font-size:13px;background:var(--bl);padding:8px;border-radius:var(--r)"><span style="color:var(--blue);font-weight:800">'+(i+1)+'.</span>'+s+'</div>'; });
+    }
+    h += '</div>';
+    out.innerHTML = h;
+  } catch(e) { out.innerHTML = '<div class="alert ad">❌ '+e.message+'</div>'; }
+}
+
+// COVER LETTER
+async function doCover() {
+  var resume = document.getElementById('cres').value.trim();
+  var company = document.getElementById('cco').value.trim();
+  var role = document.getElementById('cro').value.trim();
+  var jd = document.getElementById('cjd').value.trim();
+  if (!resume) { alert('Please paste your resume text.'); return; }
+  var out = document.getElementById('cres2');
+  out.innerHTML = spin('Writing your cover letter...');
+  try {
+    var json = await api('/api/resume/coverletter', { resume: resume, company: company, role: role, jobDescription: jd });
+    if (!json.success) throw new Error(json.error||'Failed');
+    out.innerHTML = '<div class="card"><div class="ct"><div class="ci" style="background:var(--pl)">✉️</div>Your Cover Letter</div><div class="clt" id="letterbox">'+json.letter+'</div><div class="row" style="margin-top:12px"><button class="btn bp" onclick="copyEl(\'letterbox\')">📋 Copy</button><button class="btn bpu" onclick="doCover()">🔄 Regenerate</button></div></div>';
+  } catch(e) { out.innerHTML = '<div class="alert ad">❌ '+e.message+'</div>'; }
+}
+
+// INTERVIEW — 50 questions
+async function doInterview() {
+  var role = document.getElementById('iro').value.trim();
+  var level = document.getElementById('ilvl').value;
+  var type = document.getElementById('ityp').value;
+  var num = parseInt(document.getElementById('inum').value) || 50;
+  var resume = document.getElementById('ires').value.trim();
+  if (!role) { alert('Please enter a job role.'); return; }
+  var out = document.getElementById('ires2');
+  out.innerHTML = spin('Generating ' + num + ' interview questions... this may take a moment');
+  try {
+    var json = await api('/api/resume/interview', { role: role, level: level, type: type, count: num, resume: resume });
+    if (!json.success) throw new Error(json.error || 'Failed to generate questions');
+    var qs = json.questions;
+    if (!qs || !qs.length) throw new Error('No questions returned. Please try again.');
+    // Group questions by category
+    var groups = {};
+    var catOrder = ['Technical','HR','Behavioral','Situational'];
+    var catIcons = {Technical:'⚙️', HR:'🤝', Behavioral:'🧠', Situational:'💡'};
+    var catColors = {Technical:'#4f46e5', HR:'#059669', Behavioral:'#7c3aed', Situational:'#d97706'};
+    var catBg = {Technical:'#eef2ff', HR:'#ecfdf5', Behavioral:'#f5f3ff', Situational:'#fffbeb'};
+    var difC = {Easy:'tg', Medium:'ta2', Hard:'tr'};
+
+    qs.forEach(function(q) {
+      var cat = q.category || 'General';
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push(q);
+    });
+
+    var h = '<div style="margin-bottom:12px;padding:16px;background:linear-gradient(135deg,#1e1b4b,#312e81);border-radius:16px;color:#fff">';
+    h += '<div style="font-size:16px;font-weight:800;margin-bottom:4px">🎤 ' + qs.length + ' Interview Questions — ' + role + '</div>';
+    h += '<div style="font-size:12px;opacity:.8">Grouped by category · ⭐ = Important questions to focus on</div></div>';
+
+    // For each category render a section
+    var allCats = catOrder.concat(Object.keys(groups).filter(function(k){ return catOrder.indexOf(k) === -1; }));
+    allCats.forEach(function(cat) {
+      if (!groups[cat] || !groups[cat].length) return;
+      var ql = groups[cat];
+      var col = catColors[cat] || '#4f46e5';
+      var bg = catBg[cat] || '#eef2ff';
+      var icon = catIcons[cat] || '📌';
+
+      h += '<div class="card" style="margin-bottom:16px;border-top:4px solid ' + col + '">';
+      // Category heading
+      h += '<div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">';
+      h += '<div style="width:36px;height:36px;background:' + bg + ';border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px">' + icon + '</div>';
+      h += '<div><div style="font-size:15px;font-weight:800;color:' + col + '">' + cat + ' Questions</div>';
+      h += '<div style="font-size:11px;color:var(--t3)">' + ql.length + ' questions</div></div></div>';
+
+      // Important questions callout (Hard difficulty ones)
+      var important = ql.filter(function(q){ return q.difficulty === 'Hard'; });
+      if (important.length) {
+        h += '<div style="background:#fef9c3;border:1.5px solid #fcd34d;border-radius:10px;padding:12px;margin:12px 0">';
+        h += '<div style="font-size:12px;font-weight:700;color:#92400e;margin-bottom:8px">⭐ Important — Must Prepare These</div>';
+        important.forEach(function(q) {
+          h += '<div style="font-size:13px;font-weight:600;color:#78350f;margin-bottom:6px;padding-left:8px;border-left:3px solid #f59e0b">❓ ' + q.question + '</div>';
+          if (q.tip) h += '<div style="font-size:11px;color:#92400e;padding-left:8px;margin-bottom:8px">💡 ' + q.tip + '</div>';
+        });
+        h += '</div>';
+      }
+
+      // Divider
+      h += '<div style="border-top:1px solid var(--gm);margin:10px 0"></div>';
+
+      // All questions in this category
+      ql.forEach(function(q, i) {
+        var isHard = q.difficulty === 'Hard';
+        h += '<div style="padding:11px;margin-bottom:8px;border-radius:10px;background:' + (isHard ? '#fef9c3' : 'var(--gray)') + ';border:1px solid ' + (isHard ? '#fcd34d' : 'var(--border)') + '">';
+        h += '<div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">';
+        h += '<span style="font-size:11px;font-weight:700;color:' + col + '">Q' + (i+1) + '</span>';
+        if (isHard) h += '<span style="font-size:10px;background:#fcd34d;color:#78350f;padding:2px 7px;border-radius:20px;font-weight:700">⭐ Important</span>';
+        h += '<span class="tag ' + (difC[q.difficulty] || 'ta2') + '" style="font-size:10px">' + (q.difficulty||'Medium') + '</span>';
+        h += '</div>';
+        h += '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:5px">❓ ' + q.question + '</div>';
+        if (q.tip) h += '<div style="font-size:12px;color:var(--t2);line-height:1.6;background:#fff;padding:7px;border-radius:7px">💡 <strong>Tip:</strong> ' + q.tip + '</div>';
+        h += '</div>';
+      });
+      h += '</div>';
+    });
+
+    h += '<div class="alert ai">💡 Focus on ⭐ Important questions first. Practice out loud and record yourself.</div>';
+    out.innerHTML = h;
+  } catch(e) {
+    out.innerHTML = '<div class="alert ad">❌ ' + e.message + '</div>';
+  }
+}
+// LINKEDIN
+async function doLinkedIn() {
+  var type = document.getElementById('ltyp').value;
+  var resume = document.getElementById('lres').value.trim();
+  var target = document.getElementById('ltgt').value.trim();
+  if (!resume) { alert('Please paste your resume or background.'); return; }
+  var out = document.getElementById('lres2');
+  out.innerHTML = spin('Crafting your LinkedIn content...');
+  var prompts = {
+    summary: 'Write a compelling LinkedIn About/Summary. Engaging, professional, keyword-rich, first person, 3-4 paragraphs, with a call to action.',
+    headline: 'Write 5 different LinkedIn professional headlines (max 220 chars each). Numbered list.',
+    experience: 'Write a LinkedIn experience description for the most recent role. Bullet points, strong action verbs, quantified achievements.',
+    post: 'Write an engaging LinkedIn post about this person\'s project/achievement. Inspiring, with emojis and hashtags. 150-200 words.',
+    connection: 'Write 3 LinkedIn connection request messages (max 300 chars each). Professional and friendly.',
+    recommendation: 'Write a professional recommendation request message to a former manager. Polite and specific.'
+  };
+  try {
+    var reply = await chat((prompts[type]||prompts.summary)+'\n\nBackground:\n'+resume+(target?'\nTarget Role: '+target:''));
+    out.innerHTML = '<div class="card"><div class="ct"><div class="ci" style="background:#e0f0fa">🔗</div>LinkedIn Content</div><div class="lb" id="libox">'+reply.replace(/\n/g,'<br>')+'</div><div class="row" style="margin-top:10px"><button class="btn bc" onclick="copyEl(\'libox\')">📋 Copy</button><button class="btn" onclick="doLinkedIn()">🔄 Regenerate</button></div></div><div class="alert ai">💡 Paste this in your LinkedIn profile for maximum impact!</div>';
+  } catch(e) { out.innerHTML = '<div class="alert ad">❌ '+e.message+'</div>'; }
+}
+
+// SALARY
+async function doSalary() {
+  var role = document.getElementById('sro').value.trim();
+  var loc = document.getElementById('sloc').value.trim();
+  var exp = document.getElementById('sexp').value||'1';
+  var sk = document.getElementById('ssk').value.trim()||'general';
+  if (!role||!loc) { alert('Please enter job role and location.'); return; }
+  var out = document.getElementById('sres');
+  out.innerHTML = spin('Researching salary data...');
+  try {
+    var prompt = 'Salary data for: Role="'+role+'", Experience="'+exp+' years", Location="'+loc+', India", Skills="'+sk+'".\nReturn ONLY this JSON with real values:\n{"minSalary":"4 LPA","maxSalary":"8 LPA","averageSalary":"6 LPA","marketDemand":"High","jobOutlook":"Strong demand expected","topPayingCompanies":["Google","Microsoft","Amazon"],"negotiationTips":["Research market rates","Highlight achievements","Consider total compensation"],"skillsToIncreaseSalary":["Python","Cloud","Leadership"],"factors":["Experience","Company size","Location","Skills"]}';
+    var reply = await chat(prompt);
+    var d = safeJSON(reply);
+    if (!d) {
+      out.innerHTML = '<div class="card"><div class="ct"><div class="ci" style="background:#fef3c7">💰</div>Salary Estimate</div><div style="font-size:13px;line-height:1.8;color:var(--t2)">'+reply.replace(/\n/g,'<br>')+'</div></div>';
+      return;
+    }
+    var dc = d.marketDemand==='High'?'var(--green)':d.marketDemand==='Medium'?'var(--amber)':'var(--red)';
+    var h = '<div class="sc2"><div style="font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">💰 '+role+' in '+loc+'</div><div style="font-size:28px;font-weight:900">'+(d.minSalary||'N/A')+' — '+(d.maxSalary||'N/A')+'</div><div style="font-size:12px;opacity:.7;margin-top:3px">Average: '+(d.averageSalary||'N/A')+' · '+exp+' yrs exp</div></div>';
+    h += '<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px"><div class="card" style="margin-bottom:0"><div class="ct"><div class="ci" style="background:var(--al)">📈</div>Market Demand</div><div style="font-size:24px;font-weight:900;color:'+dc+'">'+(d.marketDemand||'—')+'</div><p style="font-size:12px;color:var(--t2);margin-top:6px">'+(d.jobOutlook||'')+'</p></div>';
+    h += '<div class="card" style="margin-bottom:0"><div class="ct"><div class="ci" style="background:var(--bl)">🏢</div>Top Paying Companies</div>';
+    (d.topPayingCompanies||[]).forEach(function(c){ h += '<span class="tag tb">'+c+'</span>'; });
+    h += '</div></div>';
+    if (d.factors&&d.factors.length) {
+      h += '<div class="card"><div class="ct"><div class="ci" style="background:var(--al)">⚡</div>Salary Factors</div>';
+      d.factors.forEach(function(f){ h += '<span class="tag ta2">'+f+'</span>'; });
+      h += '</div>';
+    }
+    h += '<div class="card"><div class="ct"><div class="ci" style="background:var(--gl)">🤝</div>Negotiation Tips</div>';
+    (d.negotiationTips||[]).forEach(function(t,i){ h += '<div style="display:flex;gap:9px;padding:8px 0;border-bottom:1px solid var(--gm);font-size:13px"><span style="color:var(--green);font-weight:800">'+(i+1)+'.</span>'+t+'</div>'; });
+    h += '</div><div class="card"><div class="ct"><div class="ci" style="background:var(--pl)">🚀</div>Skills to Boost Salary</div>';
+    (d.skillsToIncreaseSalary||[]).forEach(function(s){ h += '<span class="tag tp">'+s+'</span>'; });
+    h += '</div>';
+    out.innerHTML = h;
+  } catch(e) { out.innerHTML = '<div class="alert ad">❌ '+e.message+'</div>'; }
+}
+
+// ROADMAP
+async function doRoadmap() {
+  var cur = document.getElementById('rcur').value.trim();
+  var tgt = document.getElementById('rtgt').value.trim();
+  var sk = document.getElementById('rsk').value.trim()||'basic';
+  var tl = document.getElementById('rtl').value;
+  if (!cur||!tgt) { alert('Please enter current and target role.'); return; }
+  var out = document.getElementById('rres');
+  out.innerHTML = spin('Building your personalized roadmap...');
+  try {
+    var prompt = 'Create a '+tl+' skill roadmap from '+cur+' to '+tgt+'. Current skills: '+sk+'.\nReturn ONLY JSON:\n{"steps":[{"step":1,"title":"step title","duration":"X weeks","skills":["s1","s2"],"resources":["r1","r2"],"milestone":"what you can do after this"}],"totalSteps":6,"overview":"brief overview","finalOutcome":"what they will achieve"}';
+    var reply = await chat(prompt);
+    var d = safeJSON(reply);
+    if (!d) throw new Error('Could not parse response. Please try again.');
+    var h = '<div class="card" style="background:linear-gradient(135deg,#1e1b4b,#312e81);color:#fff;margin-bottom:14px"><div style="font-size:11px;opacity:.8;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px">🗺️ '+cur+' → '+tgt+'</div><div style="font-size:16px;font-weight:700;margin-bottom:6px">'+(d.overview||'')+'</div><div style="font-size:11px;opacity:.8">Timeline: '+tl+' · '+(d.totalSteps||0)+' Steps · Goal: '+(d.finalOutcome||'')+'</div></div>';
+    h += '<div class="card"><div class="ct"><div class="ci" style="background:var(--pl)">🗺️</div>Step-by-Step Plan</div>';
+    (d.steps||[]).forEach(function(s){
+      h += '<div class="ri"><div class="rn">'+s.step+'</div><div style="flex:1"><div style="font-size:13px;font-weight:700">'+s.title+' <span style="font-size:11px;color:var(--t3);font-weight:400">· '+s.duration+'</span></div><div style="margin:4px 0">';
+      (s.skills||[]).forEach(function(sk){ h += '<span class="tag tb">'+sk+'</span>'; });
+      h += '</div>';
+      if (s.resources&&s.resources.length) h += '<div style="font-size:12px;color:var(--t2)">📚 '+s.resources.join(' · ')+'</div>';
+      if (s.milestone) h += '<div style="font-size:12px;color:var(--green);margin-top:4px;font-weight:600">🎯 '+s.milestone+'</div>';
+      h += '</div></div>';
+    });
+    h += '</div><div class="alert as">🎉 Follow this consistently and you\'ll be job-ready in '+tl+'!</div>';
+    out.innerHTML = h;
+  } catch(e) { out.innerHTML = '<div class="alert ad">❌ '+e.message+'</div>'; }
+}
+
+// DOWNLOAD PDF
+async function downloadPDF() {
+  if (!window._resumeData) { alert('Please analyze a resume first.'); return; }
+  try {
+    var res = await fetch('/api/resume/pdf', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ data: window._resumeData })
+    });
+    if (!res.ok) throw new Error('PDF generation failed');
+    var blob = await res.blob();
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = 'resume-analysis.pdf';
+    document.body.appendChild(a); a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  } catch(e) { alert('PDF Error: '+e.message); }
+}
+</script>
+</body>
+</html>
