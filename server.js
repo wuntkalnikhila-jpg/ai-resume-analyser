@@ -1,8 +1,6 @@
 require("dotenv").config();
 const express = require("express");
-
-// Read API key from env or fallback
-const GROQ_KEY = GROQ_KEY || "";
+const GROQ_KEY = process.env.GROQ_API_KEY || "";
 console.log("GROQ_API_KEY:", GROQ_KEY ? "FOUND" : "MISSING");
 const cors = require("cors");
 const Groq = require("groq-sdk");
